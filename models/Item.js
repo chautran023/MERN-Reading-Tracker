@@ -40,8 +40,8 @@ const ItemSchema = new mongoose.Schema({
     },
     purpose: {
         type: String,
-        enum:['kiến thức','giải trí','chuyên môn','sưu tầm'],
-        default: 'kiến thức',
+        enum:['tăng kiến thức','giải trí','giáo dục','sưu tầm'],
+        default: 'tăng kiến thức',
     },
     createdBy: {
         type:mongoose.Types.ObjectId,

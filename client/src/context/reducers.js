@@ -4,6 +4,9 @@ import {DISPLAY_ALERT, CLEAR_ALERT,
     UPDATE_USER_BEGIN, UPDATE_USER_SUCCESS, UPDATE_USER_ERROR,
     HANDLE_CHANGE, CLEAR_VALUES,
     CREATE_ITEM_BEGIN, CREATE_ITEM_SUCCESS, CREATE_ITEM_ERROR, 
+    GET_ITEMS_BEGIN, GET_ITEMS_SUCCESS,
+    SET_EDIT_ITEM, DELETE_ITEM_BEGIN,
+    EDIT_ITEM_BEGIN, EDIT_ITEM_SUCCESS, EDIT_ITEM_ERROR
 } from './actions'
 import { initialState } from './appContext'
 const reducer = (state, action) => {
@@ -146,6 +149,60 @@ const reducer = (state, action) => {
             alertText:action.payload.msg,
         }
     }
+    //get items
+    if (action.type === GET_ITEMS_BEGIN) {
+        return {...state, 
+            isLoading:true,  
+            showAlert:false,          
+        }
+    }
+    if (action.type === GET_ITEMS_SUCCESS) {
+        return {...state, 
+            isLoading:false,
+            items:action.payload.items,
+            numOfItems:action.payload.numOfItems,
+            numOfPages:action.payload.numOfPages,
+        }
+    }
+    //SET_EDIT_ITEM
+    if (action.type === SET_EDIT_ITEM) {
+        const item = state.items.find((item) => item._id === action.payload.id)
+        const {_id, itemName, author, seller, genres, status, purpose} = item
+        return {...state, 
+            isEditing:true,
+            editItemId:_id,
+            itemName, author, seller, genres, status, purpose
+        }
+    }
+    //DELETE_ITEM_BEGIN
+    if (action.type === DELETE_ITEM_BEGIN) {
+        return {...state, 
+            isLoading:true,
+        }
+    }
+    //EDIT_ITEM
+    if (action.type === EDIT_ITEM_BEGIN) {
+        return {...state, 
+            isLoading:true,
+        }
+    }
+    if (action.type === EDIT_ITEM_SUCCESS) {
+        return {...state, 
+            isLoading:false,
+            showAlert:true,
+            alertType:'success',
+            alertText:'Lưu thông tin thành công!'
+        }
+    }
+    if (action.type === EDIT_ITEM_ERROR) {
+        return {...state, 
+            isLoading:false,
+            showAlert:true,
+            alertType:'danger',
+            alertText:action.payload.msg,
+        }
+    }
+    
     
  throw new Error(`no such action: ${action.type}`)
 }

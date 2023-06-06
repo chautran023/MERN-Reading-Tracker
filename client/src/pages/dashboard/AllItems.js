@@ -1,8 +1,11 @@
-import React from 'react'
-
+import {ItemsContainer, SearchContainer} from '../../components/index.js';
 const AllItems = () => {
   return (
-    <div>AllItems</div>
+    <div>AllItems
+      <SearchContainer />
+      <ItemsContainer />
+
+    </div>
   )
 }
 

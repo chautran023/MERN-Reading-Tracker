@@ -20,6 +20,7 @@ const AddItem = () => {
     handleChange,
     clearValues,
     createItem,
+    editItem
   } = useAppContext()
 
   const handleInput = (e) => {
@@ -33,8 +34,8 @@ const AddItem = () => {
       displayAlert()
       return
     }
-    // if(isEditing) {} >>> editItem() will make the func
     if(isEditing) {
+      editItem()
       return
     }
     createItem()

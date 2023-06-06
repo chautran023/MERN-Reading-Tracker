@@ -11,7 +11,7 @@ const Wrapper = styled.article`
     padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--grey-100);
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
     h5 {
       letter-spacing: 0;
@@ -45,14 +45,15 @@ const Wrapper = styled.article`
     background: #fcefc7;
     color: #e9b949;
   }
-  .interview {
+  .reading {
     background: #e0e8f9;
     color: #647acb;
   }
-  .declined {
-    color: #d66a6a;
-    background: #ffeeee;
+  .completed {
+    color: #371c1c;
+    background: #8df3ad;
   }
+  
   .content {
     padding: 1rem 1.5rem;
   }

@@ -1,4 +1,4 @@
-import React, {useState, useReducer, useContext} from 'react'
+import React, {useState, useReducer, useContext, useEffect} from 'react'
 import axios from 'axios'
 import reducer from '../context/reducers'
 import { DISPLAY_ALERT, CLEAR_ALERT, 
@@ -7,6 +7,9 @@ import { DISPLAY_ALERT, CLEAR_ALERT,
     UPDATE_USER_BEGIN, UPDATE_USER_SUCCESS, UPDATE_USER_ERROR, 
     HANDLE_CHANGE, CLEAR_VALUES,
     CREATE_ITEM_BEGIN, CREATE_ITEM_SUCCESS, CREATE_ITEM_ERROR, 
+    GET_ITEMS_BEGIN, GET_ITEMS_SUCCESS,
+    SET_EDIT_ITEM, DELETE_ITEM_BEGIN,
+    EDIT_ITEM_BEGIN, EDIT_ITEM_SUCCESS, EDIT_ITEM_ERROR
 } from './actions'
 
 const user = localStorage.getItem('user')
@@ -29,7 +32,11 @@ const initialState = {
     purpose:'kiến thức',
     genresOptions:['văn học','phi hư cấu','kịch','thơ','truyện dân gian' ],
     statusOptions:['chưa đọc','đang đọc','đã đọc'],
-    purposeOptions:['kiến thức','giải trí','chuyên môn','sưu tầm']
+    purposeOptions:['tăng kiến thức','giải trí','giáo dục','sưu tầm'],
+    items:[],
+    numOfItems: 0, 
+    numOfPages: 1,
+    page:1
 }
 const AppContext = React.createContext()
 
@@ -164,16 +171,67 @@ const AppProvider = ({children}) => {
             dispatch({type:CLEAR_VALUES})
         } catch (e) {
             if(e.response.status === 401) return
-            dispatch({
+            else {
+                dispatch({
                 type:CREATE_ITEM_ERROR, 
                 payload: {msg: e.response.data.msg}
             })
             } 
-        clearAlert()
         }
-    
+        clearAlert()
+    }
+    const getItems = async () => {    
+        let url = '/items'
+        dispatch({ type: GET_ITEMS_BEGIN });
+        try {
+          const { data } = await authFetch.get('/items');
+          const { items, numOfItems, numOfPages } = data;
+          dispatch({
+            type: GET_ITEMS_SUCCESS,
+            payload: {items, numOfItems, numOfPages},
+          });
+          console.log(data);
+        } catch (e) {
+          console.log(e.response);
+          //logout the user
+        }
+        clearAlert();
+    };
+    const setEditItem = (id) => {
+        dispatch({ type:SET_EDIT_ITEM, payload: {id} })
+        console.log(`setEditItem ${id}`);
+    }
+    const editItem = async () => {
+        dispatch({ type:EDIT_ITEM_BEGIN})
+        try {
+            const {itemName, author, seller, genres, status, purpose} = state
+            await authFetch.patch(`/items/${state.editItemId}`, {
+                itemName, author, seller, genres, status, purpose
+            })
+            dispatch({ type:EDIT_ITEM_SUCCESS})
+            dispatch({ type:CLEAR_VALUES})
+        } catch (e) {
+            if(e.response.status !== 401) {
+                dispatch({
+                    type:EDIT_ITEM_ERROR, 
+                    payload: {msg: e.response.data.msg}
+                })
+            }}
+        clearAlert()
+    }
+    const deleteItem = async (itemId) => {
+        dispatch({ type:DELETE_ITEM_BEGIN})
+        try {
+            await authFetch.delete(`/items/${itemId}`)
+            getItems()
+        } catch (e) {
+            console.log(e.response);
+            //logout the user  
+        }
+    }
+     
     return (
-        <AppContext.Provider value={{...state, displayAlert, registerUser, loginUser, toggleSidebar, logoutUser, updateUser, handleChange, clearValues, createItem}}>
+        <AppContext.Provider value={{...state, displayAlert, registerUser, loginUser, toggleSidebar, logoutUser, updateUser, handleChange, clearValues, createItem, getItems, setEditItem, deleteItem, editItem}}>
             {children}
         </AppContext.Provider> )
 }

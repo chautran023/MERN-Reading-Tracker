@@ -6,6 +6,10 @@ import BigSidebar from './BigSidebar'
 import SmallSidebar from './SmallSidebar'
 import Navbar from './Navbar'
 
+import ItemsContainer from './ItemsContainer'
+import SearchContainer from './SearchContainer'
+
+
 export { Logo, FormRow, FormRowSelect, Alert ,
-BigSidebar, SmallSidebar, Navbar 
+BigSidebar, SmallSidebar, Navbar, ItemsContainer, SearchContainer
 }
