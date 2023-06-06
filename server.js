@@ -3,6 +3,7 @@ import morgan from 'morgan'
 import express from 'express'
 import notFoundMiddleware from './middleware/not-found.js'
 import errorHandlerMiddleware from './middleware/error-handler.js'
+import authenticateUser from './middleware/auth.js'
 import dotenv from 'dotenv'
 dotenv.config()
 import connectDB from './db/connect.js'
@@ -20,7 +21,7 @@ app.get('/api/v1',(req, res) => {
 })
 
 app.use('/api/v1/auth',authRouter)
-app.use('/api/v1/items',itemsRouter)
+app.use('/api/v1/items',authenticateUser, itemsRouter)
 
 app.use(notFoundMiddleware)
 app.use(errorHandlerMiddleware)

@@ -45,6 +45,19 @@ const login = async (req, res) => {
     res.status(StatusCodes.OK).json({user,token,lastName:user.lastName}); //thich thi bo vi lastName co san trong user roi
 }
 const updateUser = async (req, res) => {
-    res.send('update user')
+    const {name, email, lastName} = req.body
+    if(!name || !email || !lastName) {
+        throw new BadRequestError('Vui lòng nhập đủ trường thông tin')
+    }
+    const user = await User.findOneAndUpdate(
+        {_id:req.userInfo.userID}, 
+        req.body,
+        {new:true,runValidators: true})
+    // user.name = name
+    // user.email = email
+    // user.lastName = lastName
+    // await user.save()
+    const token = user.createJWT()
+    res.status(StatusCodes.OK).json({user,token,lastName:user.lastName}); //thich thi bo vi lastName co san trong user roi
 }
 export { register, login, updateUser }

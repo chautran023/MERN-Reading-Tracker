@@ -1,7 +1,7 @@
 import React from 'react'
 import Wrapper from '../assets/wrappers/Navbar'
 import { GrTextAlignLeft } from 'react-icons/gr'
-import { AiOutlineUser} from 'react-icons/ai'
+import { FaUserAlt} from 'react-icons/fa'
 import { BsFillCaretDownFill } from 'react-icons/bs'
 import { useAppContext } from '../context/appContext'
 import { useState } from 'react'
@@ -21,7 +21,7 @@ const Navbar = () => {
                 </div>
                 <div className='btn-container'>
                     <button type='button' className='btn' onClick={() => setShowLogout(!showLogout)}>
-                        <AiOutlineUser />
+                        <FaUserAlt />
                         Chào, {user && user.name}
                         <BsFillCaretDownFill />
                     </button>

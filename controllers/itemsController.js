@@ -1,5 +1,18 @@
+import Item from '../models/Item.js';
+import { StatusCodes } from 'http-status-codes';
+import { BadRequestError, UnAuthenticatedError } from '../errors/index.js';
+
 const createItem = async (req, res) => {
-    res.send('create item')
+    const { itemName, author, seller } = req.body;
+
+    if (!itemName || !author || !seller) {
+        throw new BadRequestError('Please Provide All Values');
+    }
+
+    req.body.createdBy = req.userInfo.userID;
+
+    const item = await Item.create(req.body);
+    res.status(StatusCodes.CREATED).json({ item });
 }
 
 const getAllItems = async (req, res) => {
