@@ -50,7 +50,7 @@ const Wrapper = styled.article`
     color: #647acb;
   }
   .completed {
-    color: #371c1c;
+    color: #06aa03;
     background: #8df3ad;
   }
   

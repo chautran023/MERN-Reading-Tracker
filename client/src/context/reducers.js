@@ -6,7 +6,8 @@ import {DISPLAY_ALERT, CLEAR_ALERT,
     CREATE_ITEM_BEGIN, CREATE_ITEM_SUCCESS, CREATE_ITEM_ERROR, 
     GET_ITEMS_BEGIN, GET_ITEMS_SUCCESS,
     SET_EDIT_ITEM, DELETE_ITEM_BEGIN,
-    EDIT_ITEM_BEGIN, EDIT_ITEM_SUCCESS, EDIT_ITEM_ERROR
+    EDIT_ITEM_BEGIN, EDIT_ITEM_SUCCESS, EDIT_ITEM_ERROR,
+    SHOW_STATS_BEGIN, SHOW_STATS_SUCCESS
 } from './actions'
 import { initialState } from './appContext'
 const reducer = (state, action) => {
@@ -123,7 +124,7 @@ const reducer = (state, action) => {
             seller:'',
             genres:'văn học',
             status:'chưa đọc',
-            purpose:'kiến thức',
+            purpose:'tăng kiến thức',
         }
         return {...state, ...initialState }
     }
@@ -202,7 +203,20 @@ const reducer = (state, action) => {
             alertText:action.payload.msg,
         }
     }
-    
+    //SHOW STATUS STATS
+    if (action.type === SHOW_STATS_BEGIN) {
+        return {...state, 
+            isLoading:true,
+            showAlert:false,
+        }
+    }
+    if (action.type === SHOW_STATS_SUCCESS) {
+        return {...state, 
+            isLoading:false,
+            statStatus:action.payload.statStatus,
+            monthlyApplications:action.payload.monthlyApplications,
+        }
+    }
     
  throw new Error(`no such action: ${action.type}`)
 }

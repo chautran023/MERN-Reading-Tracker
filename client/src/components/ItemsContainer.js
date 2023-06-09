@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import Loading from "./Loading.js"
+import { Loading } from '../components'
 import Item from "./Item.js"
 import Wrapper from "../assets/wrappers/ItemsContainer.js"
 import { useAppContext } from "../context/appContext"

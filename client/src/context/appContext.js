@@ -9,7 +9,8 @@ import { DISPLAY_ALERT, CLEAR_ALERT,
     CREATE_ITEM_BEGIN, CREATE_ITEM_SUCCESS, CREATE_ITEM_ERROR, 
     GET_ITEMS_BEGIN, GET_ITEMS_SUCCESS,
     SET_EDIT_ITEM, DELETE_ITEM_BEGIN,
-    EDIT_ITEM_BEGIN, EDIT_ITEM_SUCCESS, EDIT_ITEM_ERROR
+    EDIT_ITEM_BEGIN, EDIT_ITEM_SUCCESS, EDIT_ITEM_ERROR,
+    SHOW_STATS_BEGIN, SHOW_STATS_SUCCESS
 } from './actions'
 
 const user = localStorage.getItem('user')
@@ -29,14 +30,16 @@ const initialState = {
     seller:'',
     genres:'văn học',
     status:'chưa đọc',
-    purpose:'kiến thức',
+    purpose:'tăng kiến thức',
     genresOptions:['văn học','phi hư cấu','kịch','thơ','truyện dân gian' ],
     statusOptions:['chưa đọc','đang đọc','đã đọc'],
     purposeOptions:['tăng kiến thức','giải trí','giáo dục','sưu tầm'],
     items:[],
     numOfItems: 0, 
     numOfPages: 1,
-    page:1
+    page:1,
+    statStatus:{},
+    monthlyApplications:[],
 }
 const AppContext = React.createContext()
 
@@ -229,9 +232,26 @@ const AppProvider = ({children}) => {
             //logout the user  
         }
     }
+    const showStats = async () => {
+        dispatch({ type:SHOW_STATS_BEGIN})
+        try {
+            const {data} = await authFetch.get('/items/stats')
+            dispatch({ 
+                type:SHOW_STATS_SUCCESS, 
+                payload: {
+                statStatus: data.defaultStatStatus,
+                monthlyApplications: data.monthlyApplications,
+                }
+            })
+        } catch (e) {
+            console.log(e.response);
+            //logout the user  
+        }
+        clearAlert()
+    }
      
     return (
-        <AppContext.Provider value={{...state, displayAlert, registerUser, loginUser, toggleSidebar, logoutUser, updateUser, handleChange, clearValues, createItem, getItems, setEditItem, deleteItem, editItem}}>
+        <AppContext.Provider value={{...state, displayAlert, registerUser, loginUser, toggleSidebar, logoutUser, updateUser, handleChange, clearValues, createItem, getItems, setEditItem, deleteItem, editItem, showStats}}>
             {children}
         </AppContext.Provider> )
 }

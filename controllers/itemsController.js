@@ -1,6 +1,8 @@
 import Item from '../models/Item.js';
+import mongoose from 'mongoose'
 import { StatusCodes } from 'http-status-codes';
 import { BadRequestError, UnAuthenticatedError, NotFoundError } from '../errors/index.js';
+import moment from 'moment'
 
 const createItem = async (req, res) => {
     const { itemName, author, seller } = req.body;
@@ -61,7 +63,69 @@ const deleteItem = async (req, res) => {
 }
 
 const showStats = async (req, res) => {
-    res.send('show stats')
+    let statStatus = await Item.aggregate([
+        {$match:{createdBy:mongoose.Types.ObjectId(req.userInfo.userID)}},
+        {$group:{_id:'$status', count:{$sum:1}}},
+    ])
+    let statGenres = await Item.aggregate([
+        {$match:{createdBy:mongoose.Types.ObjectId(req.userInfo.userID)}},
+        {$group:{_id:'$genres', count:{$sum:1}}},
+    ])
+    let statPurpose = await Item.aggregate([
+        {$match:{createdBy:mongoose.Types.ObjectId(req.userInfo.userID)}},
+        {$group:{_id:'$purpose', count:{$sum:1}}},
+    ])
+    //reduce
+    statStatus = statStatus.reduce((acc, curr) => {
+        const {_id:title, count} = curr
+        acc[title] = count
+        return acc
+    },{})
+    //default
+    const defaultStatStatus = {
+        'đang đọc': statStatus['đang đọc'] || 0,
+        'chưa đọc': statStatus['chưa đọc'] || 0,
+        'đã đọc': statStatus['đã đọc'] || 0,
+    }
+    //chart: monthly new books bought
+    let monthlyApplications =  await Item.aggregate([
+        { $match: { createdBy: mongoose.Types.ObjectId(req.userInfo.userID) } },
+        {
+          $group: {
+            _id: {
+              year: {$year: '$createdAt',},
+              month: {$month: '$createdAt',},
+            },count: {$sum: 1}, total: { $sum: "$price" }
+          },
+        },
+        { $sort: { '_id.year': -1, '_id.month': -1 } },
+        { $limit: 6 }, //6 latest months
+    ])
+    monthlyApplications = monthlyApplications.map((item) => {
+        const { _id: {year, month}, count, total} = item
+        const date = moment().month(month - 1).year(year).locale('vi').format('MMM Y')
+        return {date, count, total}
+    }).reverse()
+
+    //chart: monthly cost
+    // let monthlyCost =  await Item.aggregate([
+    //     { $match: { createdBy: mongoose.Types.ObjectId(req.userInfo.userID) } },
+    //     {
+    //       $group: {
+    //         _id: {
+    //           year: {$year: '$createdAt',},
+    //           month: {$month: '$createdAt',},
+    //         },total: { $sum: "$price" } }
+    //     },
+    //     { $sort: { '_id.year': -1, '_id.month': -1 } },
+    //     { $limit: 6 }, //6 latest months
+    // ])
+    // monthlyCost = monthlyCost.map((item) => {
+    //     const { _id: {year, month}, total} = item
+    //     const date = moment().month(month - 1).year(year).locale('vi').format('MMM Y')
+    //     return {date, total}
+    // }).reverse()
+    res.status(StatusCodes.OK).json({defaultStatStatus, monthlyApplications })
 }
 
 
