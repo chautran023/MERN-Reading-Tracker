@@ -1,10 +1,9 @@
 import {ItemsContainer, SearchContainer} from '../../components/index.js';
 const AllItems = () => {
   return (
-    <div>AllItems
+    <div>
       <SearchContainer />
       <ItemsContainer />
-
     </div>
   )
 }

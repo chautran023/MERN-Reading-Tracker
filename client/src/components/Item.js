@@ -3,16 +3,20 @@ import { FaCalendarAlt, FaRegHandPointRight} from 'react-icons/fa'
 import {FiEdit, FiDelete} from 'react-icons/fi'
 import {AiFillFolderOpen} from 'react-icons/ai'
 import {MdSell} from 'react-icons/md'
+import {FaShopify} from 'react-icons/fa'
+
 import { Link } from 'react-router-dom'
 import { useAppContext } from '../context/appContext'
 import Wrapper from '../assets/wrappers/Item.js'
 import ItemInfo from './ItemInfo.js'
 
-const Item = ({_id, itemName, author, seller, genres, status, purpose, createdAt}) => {
+const Item = ({_id, itemName, price, author, seller, genres, status, purpose, createdAt}) => {
   const {setEditItem, deleteItem} = useAppContext()
   let date = moment(createdAt)
   date = date.format('Do MMM, YYYY')
-  
+  function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
   return (
     <Wrapper>
       <header>
@@ -32,9 +36,10 @@ const Item = ({_id, itemName, author, seller, genres, status, purpose, createdAt
         <div className="content-center">
           <ItemInfo icon={<AiFillFolderOpen />} text={genres}></ItemInfo>
           <ItemInfo icon={<FaRegHandPointRight />} text={purpose}></ItemInfo>
-          <ItemInfo icon={<MdSell />}text={seller}></ItemInfo>
+          <ItemInfo icon={<FaShopify />}text={seller}></ItemInfo>
           <ItemInfo icon={<FaCalendarAlt />} text={date}></ItemInfo>
-          
+          <ItemInfo icon={<MdSell />} text={numberWithCommas(price)}></ItemInfo>
+
             {(status === 'chưa đọc') &&
               <div className='status pending'>{status}</div>}
             

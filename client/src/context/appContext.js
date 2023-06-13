@@ -1,4 +1,4 @@
-import React, {useState, useReducer, useContext, useEffect} from 'react'
+import React, { useReducer, useContext } from 'react'
 import axios from 'axios'
 import reducer from '../context/reducers'
 import { DISPLAY_ALERT, CLEAR_ALERT, 
@@ -10,7 +10,7 @@ import { DISPLAY_ALERT, CLEAR_ALERT,
     GET_ITEMS_BEGIN, GET_ITEMS_SUCCESS,
     SET_EDIT_ITEM, DELETE_ITEM_BEGIN,
     EDIT_ITEM_BEGIN, EDIT_ITEM_SUCCESS, EDIT_ITEM_ERROR,
-    SHOW_STATS_BEGIN, SHOW_STATS_SUCCESS
+    SHOW_STATS_BEGIN, SHOW_STATS_SUCCESS, CLEAR_FILTERS, CHANGE_PAGE
 } from './actions'
 
 const user = localStorage.getItem('user')
@@ -27,6 +27,7 @@ const initialState = {
     editItemId:'',
     itemName:'',
     author:'', 
+    price: 0,
     seller:'',
     genres:'văn học',
     status:'chưa đọc',
@@ -40,6 +41,12 @@ const initialState = {
     page:1,
     statStatus:{},
     monthlyApplications:[],
+    search: '',
+    searchStatus: 'tất cả',
+    searchGenres: 'tất cả',
+    searchPurpose: 'tất cả',
+    sort: 'mới nhất',
+    sortOptions: ['mới nhất', 'cũ nhất', 'a-z', 'z-a'],
 }
 const AppContext = React.createContext()
 
@@ -166,9 +173,9 @@ const AppProvider = ({children}) => {
     const createItem = async () => {
         dispatch({type:CREATE_ITEM_BEGIN})
         try {
-            const {itemName, author, seller, genres, status, purpose} = state
+            const {itemName, author, seller, price, genres, status, purpose} = state
             await authFetch.post('/items', {
-                itemName, author, seller, genres, status, purpose
+                itemName, author, seller, price, genres, status, purpose
             })
             dispatch({type:CREATE_ITEM_SUCCESS})
             dispatch({type:CLEAR_VALUES})
@@ -183,11 +190,15 @@ const AppProvider = ({children}) => {
         }
         clearAlert()
     }
-    const getItems = async () => {    
-        let url = '/items'
+    const getItems = async () => {   
+        const {page, search, searchStatus, searchGenres, searchPurpose, sort } = state
+        let url = `/items?page=${page}&status=${searchStatus}&genres=${searchGenres}&purpose=${searchPurpose}&sort=${sort}`
+        if(search) {
+            url += `&search=${search}`
+        }
         dispatch({ type: GET_ITEMS_BEGIN });
         try {
-          const { data } = await authFetch.get('/items');
+          const { data } = await authFetch.get(url);
           const { items, numOfItems, numOfPages } = data;
           dispatch({
             type: GET_ITEMS_SUCCESS,
@@ -195,8 +206,7 @@ const AppProvider = ({children}) => {
           });
           console.log(data);
         } catch (e) {
-          console.log(e.response);
-          //logout the user
+          logoutUser();
         }
         clearAlert();
     };
@@ -207,9 +217,9 @@ const AppProvider = ({children}) => {
     const editItem = async () => {
         dispatch({ type:EDIT_ITEM_BEGIN})
         try {
-            const {itemName, author, seller, genres, status, purpose} = state
+            const {itemName, author, seller, price, genres, status, purpose} = state
             await authFetch.patch(`/items/${state.editItemId}`, {
-                itemName, author, seller, genres, status, purpose
+                itemName, author, seller, price, genres, status, purpose
             })
             dispatch({ type:EDIT_ITEM_SUCCESS})
             dispatch({ type:CLEAR_VALUES})
@@ -228,8 +238,7 @@ const AppProvider = ({children}) => {
             await authFetch.delete(`/items/${itemId}`)
             getItems()
         } catch (e) {
-            console.log(e.response);
-            //logout the user  
+            logoutUser()
         }
     }
     const showStats = async () => {
@@ -244,14 +253,18 @@ const AppProvider = ({children}) => {
                 }
             })
         } catch (e) {
-            console.log(e.response);
-            //logout the user  
+            logoutUser()  
         }
         clearAlert()
     }
-     
+    const clearFilters = () => {
+        dispatch({ type:CLEAR_FILTERS })
+    }
+    const changePage = (page) => {
+        dispatch({ type:CHANGE_PAGE, payload:{page} })
+    }
     return (
-        <AppContext.Provider value={{...state, displayAlert, registerUser, loginUser, toggleSidebar, logoutUser, updateUser, handleChange, clearValues, createItem, getItems, setEditItem, deleteItem, editItem, showStats}}>
+        <AppContext.Provider value={{...state, displayAlert, registerUser, loginUser, toggleSidebar, logoutUser, updateUser, handleChange, clearValues, createItem, getItems, setEditItem, deleteItem, editItem, showStats, clearFilters, changePage}}>
             {children}
         </AppContext.Provider> )
 }

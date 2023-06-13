@@ -1,7 +1,6 @@
 import { FormRow, FormRowSelect, Alert } from '../../components'
 import { useAppContext } from '../../context/appContext'
 import Wrapper from '../../assets/wrappers/DashboardFormPage'
-
 const AddItem = () => {
   const {
     isLoading,
@@ -11,6 +10,7 @@ const AddItem = () => {
     itemName,
     author, 
     seller,
+    price,
     genres,
     status,
     purpose, 
@@ -30,7 +30,7 @@ const AddItem = () => {
     }
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!itemName || !author || !seller) {
+    if (!itemName || !author || !seller || !price) {
       displayAlert()
       return
     }
@@ -62,7 +62,7 @@ const AddItem = () => {
               labelText='tác giả/dịch giả' 
               handleChange={handleInput}
             /> 
-            {/* author input */}
+            {/* seller input */}
             <FormRow 
               type='text'
               name='seller'
@@ -70,6 +70,14 @@ const AddItem = () => {
               labelText='nhà bán/kênh mua hàng' 
               handleChange={handleInput}
             /> 
+             {/* price input */}
+             <FormRow 
+              type='number'
+              name='price'
+              value={price}
+              labelText='giá' 
+              handleChange={handleInput}
+            />
             {/* select genres, status, purpose */}
             <FormRowSelect 
               name='genres'

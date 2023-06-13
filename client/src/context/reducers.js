@@ -7,7 +7,7 @@ import {DISPLAY_ALERT, CLEAR_ALERT,
     GET_ITEMS_BEGIN, GET_ITEMS_SUCCESS,
     SET_EDIT_ITEM, DELETE_ITEM_BEGIN,
     EDIT_ITEM_BEGIN, EDIT_ITEM_SUCCESS, EDIT_ITEM_ERROR,
-    SHOW_STATS_BEGIN, SHOW_STATS_SUCCESS
+    SHOW_STATS_BEGIN, SHOW_STATS_SUCCESS, CLEAR_FILTERS, CHANGE_PAGE
 } from './actions'
 import { initialState } from './appContext'
 const reducer = (state, action) => {
@@ -111,6 +111,7 @@ const reducer = (state, action) => {
     //handle change
     if (action.type === HANDLE_CHANGE) {
         return {...state, 
+            page: 1,
             [action.payload.name]:action.payload.value
         }
     }
@@ -122,6 +123,7 @@ const reducer = (state, action) => {
             itemName:'',
             author:'', 
             seller:'',
+            price:0,
             genres:'văn học',
             status:'chưa đọc',
             purpose:'tăng kiến thức',
@@ -168,11 +170,11 @@ const reducer = (state, action) => {
     //SET_EDIT_ITEM
     if (action.type === SET_EDIT_ITEM) {
         const item = state.items.find((item) => item._id === action.payload.id)
-        const {_id, itemName, author, seller, genres, status, purpose} = item
+        const {_id, itemName, author, seller, price, genres, status, purpose} = item
         return {...state, 
             isEditing:true,
             editItemId:_id,
-            itemName, author, seller, genres, status, purpose
+            itemName, author, seller, price, genres, status, purpose
         }
     }
     //DELETE_ITEM_BEGIN
@@ -215,6 +217,20 @@ const reducer = (state, action) => {
             isLoading:false,
             statStatus:action.payload.statStatus,
             monthlyApplications:action.payload.monthlyApplications,
+        }
+    }
+    if (action.type === CLEAR_FILTERS) {
+        return {...state, 
+            search: '',
+            searchStatus: 'tất cả',
+            searchGenres: 'tất cả',
+            searchPurpose: 'tất cả',
+            sort: 'mới nhất',
+        }
+    }
+    if (action.type === CHANGE_PAGE) {
+        return {...state, 
+            page:action.payload.page
         }
     }
     

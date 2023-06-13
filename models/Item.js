@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 import validator from 'validator'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+
 mongoose.set('strictQuery', false);
 
 const ItemSchema = new mongoose.Schema({

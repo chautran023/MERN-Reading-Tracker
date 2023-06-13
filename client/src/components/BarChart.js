@@ -1,5 +1,4 @@
 import {
-    BarChart,
     Bar,
     XAxis,
     YAxis,
@@ -8,7 +7,6 @@ import {
     ComposedChart,
     Tooltip,
     Legend,
-    Area,
     Line
   } from 'recharts';
 const BarChartComponent = ({data}) => {

@@ -15,8 +15,50 @@ const createItem = async (req, res) => {
 }
 
 const getAllItems = async (req, res) => {
-    const items = await Item.find({createdBy:req.userInfo.userID})
-    res.status(StatusCodes.OK).json({ items, numOfItems: items.length, numOfPages: 1 });
+    const {status, genres, purpose, sort, search } = req.query
+    const queryObject = {
+        createdBy:req.userInfo.userID
+    }
+    //add conditions
+    if(status !== 'tất cả') {
+        queryObject.status = status
+    }
+    if(genres !== 'tất cả') {
+        queryObject.genres = genres
+    }
+    if(purpose !== 'tất cả') {
+        queryObject.purpose = purpose
+    }
+    //search
+    if(search) {
+        queryObject.itemName = {$regex:search, $options:'i'}
+    }
+    let result = Item.find(queryObject)
+    // chain sort conditions
+    if (sort === 'mới nhất') {
+        result = result.sort('-createdAt');
+      }
+      if (sort === 'cũ nhất') {
+        result = result.sort('createdAt');
+      }
+      if (sort === 'a-z') {
+        result = result.sort('itemName').collation({ locale: "vi", caseLevel: true });
+      }
+      if (sort === 'z-a') {
+        result = result.sort('-itemName').collation({ locale: "vi", caseLevel: true });
+      }
+     // setup pagination
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    result = result.skip(skip).limit(limit);
+    const items = await result
+
+    const numOfItems = await Item.countDocuments(queryObject);
+    const numOfPages = Math.ceil(numOfItems / limit);
+
+    res.status(StatusCodes.OK).json({ numOfItems, numOfPages, items });
 }
 
 const updateItem = async (req, res) => {

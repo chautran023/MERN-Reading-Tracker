@@ -3,12 +3,16 @@ import { Loading } from '../components'
 import Item from "./Item.js"
 import Wrapper from "../assets/wrappers/ItemsContainer.js"
 import { useAppContext } from "../context/appContext"
+import PageBtnContainer from './PageBtnContainer'
 
 const ItemsContainer = () => {
-    const { items, isLoading, numOfItems, page, getItems} = useAppContext()
+    const { items, isLoading, numOfItems, page, getItems,
+        search, searchStatus, searchGenres, searchPurpose, sort,
+        numOfPages} = useAppContext()
     useEffect(() => {
         getItems()
-    }, [])
+        // eslint-disable-next-line
+    }, [page, search, searchStatus, searchGenres, searchPurpose, sort])
 
     if(isLoading) return <Loading center />
     if(items.length === 0) {
@@ -26,7 +30,8 @@ const ItemsContainer = () => {
                     <Item key={item._id}{...item}></Item>
                 )})}
             </div>
-            {/* pagination buttons */}
+            {numOfPages > 1 && <PageBtnContainer />}
+            
         </Wrapper>
     )
 };
