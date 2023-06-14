@@ -1,10 +1,10 @@
 import { useAppContext } from '../context/appContext';
 import Wrapper from '../assets/wrappers/SearchContainer.js';
 import { FormRow, FormRowSelect } from '../components'
+import { useState, useMemo } from 'react';
 
 const SearchContainer = () => {
     const {isLoading,
-        search,
         searchStatus,
         searchGenres,
         searchPurpose,
@@ -14,11 +14,31 @@ const SearchContainer = () => {
         clearFilters,
         genresOptions,
         statusOptions,
-        purposeOptions } = useAppContext()
+        purposeOptions,
+        filterPrice,
+        filterPriceOptions } = useAppContext()
+    const [localSearch, setLocalSearch] = useState('');
     const handleSearch = (e) => {
-        // if(isLoading) return : bỏ cái này thì nó ko bị chờ thay đổi isLoading khi gõ search nữa 
         handleChange({name:e.target.name, value:e.target.value})
     }
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setLocalSearch('');
+        clearFilters();
+    };
+    const debounce = () => {
+        let timeoutID;
+        return (e) => {
+          setLocalSearch(e.target.value);
+          clearTimeout(timeoutID);
+          timeoutID = setTimeout(() => {
+            handleChange({ name: e.target.name, value: e.target.value });
+          }, 1000);
+        };
+      };
+      // eslint-disable-next-line
+      const optimizedDebounce = useMemo(() => debounce(), []);
+
     return (
         <Wrapper>
             <form className="form">
@@ -28,9 +48,9 @@ const SearchContainer = () => {
                 <FormRow 
                     type='text'
                     name='search'
-                    value={search}
+                    value={localSearch}
                     labelText='tên sách' 
-                    handleChange={handleSearch}
+                    handleChange={optimizedDebounce}
                 /> 
                 {/* search status */}
                 <FormRowSelect
@@ -56,6 +76,14 @@ const SearchContainer = () => {
                     handleChange={handleSearch}
                     list={['tất cả', ...purposeOptions]}
                 />
+                {/* filters */}
+                <FormRowSelect
+                    labelText='Giá'
+                    name='filterPrice'
+                    value={filterPrice}
+                    handleChange={handleSearch}
+                    list={['tất cả', ...filterPriceOptions]}
+                />
                 {/* sort */}
                 <FormRowSelect
                     labelText='Sắp xếp'
@@ -68,10 +96,7 @@ const SearchContainer = () => {
                     type='submit'
                     className='btn btn-block clear-btn'
                     disabled={isLoading}
-                    onClick={(e) => {
-                        e.preventDefault()
-                        clearFilters()
-                      }}
+                    onClick={handleSubmit}
                 >
                     Xóa bộ lọc
                 </button>

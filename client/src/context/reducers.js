@@ -226,6 +226,7 @@ const reducer = (state, action) => {
             searchGenres: 'tất cả',
             searchPurpose: 'tất cả',
             sort: 'mới nhất',
+            filterPrice: 'tất cả', 
         }
     }
     if (action.type === CHANGE_PAGE) {

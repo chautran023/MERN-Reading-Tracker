@@ -7,12 +7,12 @@ import PageBtnContainer from './PageBtnContainer'
 
 const ItemsContainer = () => {
     const { items, isLoading, numOfItems, page, getItems,
-        search, searchStatus, searchGenres, searchPurpose, sort,
+        search, searchStatus, searchGenres, searchPurpose, sort, filterPrice,
         numOfPages} = useAppContext()
     useEffect(() => {
         getItems()
         // eslint-disable-next-line
-    }, [page, search, searchStatus, searchGenres, searchPurpose, sort])
+    }, [page, search, searchStatus, searchGenres, searchPurpose, sort, filterPrice])
 
     if(isLoading) return <Loading center />
     if(items.length === 0) {

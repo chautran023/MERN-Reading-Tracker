@@ -15,7 +15,7 @@ const createItem = async (req, res) => {
 }
 
 const getAllItems = async (req, res) => {
-    const {status, genres, purpose, sort, search } = req.query
+    const {status, genres, purpose, sort, search, numericFilters } = req.query
     const queryObject = {
         createdBy:req.userInfo.userID
     }
@@ -33,6 +33,35 @@ const getAllItems = async (req, res) => {
     if(search) {
         queryObject.itemName = {$regex:search, $options:'i'}
     }
+    //filter theo price
+    if(numericFilters) {
+        const operatorMap = {
+            '>': '$gt',
+            '>=': '$gte',
+            '=': '$eq',
+            '<': '$lt',
+            '<=': '$lte',
+          };
+          const regEx = /\b(<|>|>=|=|<|<=)\b/g;
+          let filters = numericFilters.replace(
+            regEx,
+            (match) => `-${operatorMap[match]}-`
+          );
+
+          const options = ['price'];
+          filters = filters.split(',').forEach((item) => {
+            const [field, operator, value, operator2, value2] = item.split('-');
+            if (options.includes(field)) {
+                if(operator2 === undefined) {
+                        queryObject[field] = { [operator]: Number(value) };
+                }
+                else {
+                    queryObject[field] = { [operator]: Number(value),[operator2]:Number(value2) };
+                }
+            }
+          });
+    }
+    
     let result = Item.find(queryObject)
     // chain sort conditions
     if (sort === 'mới nhất') {
@@ -47,6 +76,7 @@ const getAllItems = async (req, res) => {
       if (sort === 'z-a') {
         result = result.sort('-itemName').collation({ locale: "vi", caseLevel: true });
       }
+      
      // setup pagination
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;

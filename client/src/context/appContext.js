@@ -47,6 +47,8 @@ const initialState = {
     searchPurpose: 'tất cả',
     sort: 'mới nhất',
     sortOptions: ['mới nhất', 'cũ nhất', 'a-z', 'z-a'],
+    filterPrice: 'tất cả', 
+    filterPriceOptions: ['Dưới 400,000', 'Từ 400,000 đến 500,000', 'Trên 500,000']
 }
 const AppContext = React.createContext()
 
@@ -90,7 +92,7 @@ const AppProvider = ({children}) => {
     }
     const addUserToLocalStorage = ({user, token}) => {
         localStorage.setItem('user', JSON.stringify(user))
-        localStorage.setItem('token', JSON.stringify(token))
+        localStorage.setItem('token', token)
     }
     const removeUserFromLocalStorage = () => {
         localStorage.removeItem('user')
@@ -191,10 +193,27 @@ const AppProvider = ({children}) => {
         clearAlert()
     }
     const getItems = async () => {   
-        const {page, search, searchStatus, searchGenres, searchPurpose, sort } = state
+        const {filterPrice, page, search, searchStatus, searchGenres, searchPurpose, sort } = state
         let url = `/items?page=${page}&status=${searchStatus}&genres=${searchGenres}&purpose=${searchPurpose}&sort=${sort}`
         if(search) {
             url += `&search=${search}`
+        }
+        if(filterPrice) {
+            let filters
+            switch(filterPrice) {
+                case 'Dưới 400,000':
+                  filters = "<400000";
+                  break;
+                case "Từ 400,000 đến 500,000":
+                  filters = ">=400000<500000";
+                  break;
+                case "Trên 500,000":
+                  filters = ">500000";
+                  break;
+                default:
+                  filters = 'tất cả';
+            }
+            url += `&numericFilters=price${filters}`
         }
         dispatch({ type: GET_ITEMS_BEGIN });
         try {
@@ -204,7 +223,7 @@ const AppProvider = ({children}) => {
             type: GET_ITEMS_SUCCESS,
             payload: {items, numOfItems, numOfPages},
           });
-          console.log(data);
+        //   console.log(data);
         } catch (e) {
           logoutUser();
         }
