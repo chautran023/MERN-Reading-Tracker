@@ -8,7 +8,7 @@ import { DISPLAY_ALERT, CLEAR_ALERT,
     HANDLE_CHANGE, CLEAR_VALUES,
     CREATE_ITEM_BEGIN, CREATE_ITEM_SUCCESS, CREATE_ITEM_ERROR, 
     GET_ITEMS_BEGIN, GET_ITEMS_SUCCESS,
-    SET_EDIT_ITEM, DELETE_ITEM_BEGIN,
+    SET_EDIT_ITEM, DELETE_ITEM_BEGIN, DELETE_ITEM_ERROR,
     EDIT_ITEM_BEGIN, EDIT_ITEM_SUCCESS, EDIT_ITEM_ERROR,
     SHOW_STATS_BEGIN, SHOW_STATS_SUCCESS, CLEAR_FILTERS, CHANGE_PAGE
 } from './actions'
@@ -257,8 +257,13 @@ const AppProvider = ({children}) => {
             await authFetch.delete(`/items/${itemId}`)
             getItems()
         } catch (e) {
-            logoutUser()
-        }
+            if(e.response.status !== 401) {
+                dispatch({
+                    type:DELETE_ITEM_ERROR, 
+                    payload: {msg: e.response.data.msg}
+                })
+            }}
+        clearAlert()
     }
     const showStats = async () => {
         dispatch({ type:SHOW_STATS_BEGIN})

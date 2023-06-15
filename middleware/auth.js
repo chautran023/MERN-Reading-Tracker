@@ -10,6 +10,8 @@ const auth = async (req, res, next) => {
         const payload = jwt.verify(token, process.env.JWT_SECRET)
         req.userInfo = payload //send this user ID to next middleware (items/jobs routes...)
         //req.userInfo = {userID : payload.userID}
+        const testUser = payload.userID === '648984e4e8f824bc1ca16da7'
+        payload.testUser = testUser
         next()
     } catch (err) {
         throw new UnAuthenticatedError('Authentication Invalid')

@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import { Loading } from '../components'
 import Item from "./Item.js"
+import Alert from "../components/Alert.js"
 import Wrapper from "../assets/wrappers/ItemsContainer.js"
 import { useAppContext } from "../context/appContext"
 import PageBtnContainer from './PageBtnContainer'
@@ -8,7 +9,7 @@ import PageBtnContainer from './PageBtnContainer'
 const ItemsContainer = () => {
     const { items, isLoading, numOfItems, page, getItems,
         search, searchStatus, searchGenres, searchPurpose, sort, filterPrice,
-        numOfPages} = useAppContext()
+        numOfPages, showAlert} = useAppContext()
     useEffect(() => {
         getItems()
         // eslint-disable-next-line
@@ -23,6 +24,7 @@ const ItemsContainer = () => {
     )}
     return (
         <Wrapper>
+            {showAlert && <Alert />}
             <h5>Tìm thấy {numOfItems} kết quả</h5>
             <div className="items">
                 {items.map((item) => {

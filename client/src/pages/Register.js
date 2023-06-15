@@ -83,6 +83,15 @@ const Register = () => {
                     disabled={isLoading}>
                     gửi
                 </button>
+                {/* Test User button */}
+                <button 
+                    type='button'
+                    className='btn btn-block btn-hipster'
+                    disabled={isLoading}
+                    onClick={() => loginUser({email:'testUser@test.com', password:'secret',})}
+                    >
+                    {isLoading ? 'Đang tải...' : 'Xem bản Demo'}
+                </button>
                 <p>
                     {values.isMember ? 'Bạn chưa đăng ký thành viên?' : 'Bạn là thành viên?'}
                     <button type='button' onClick={toggleMember} className='member-btn'>

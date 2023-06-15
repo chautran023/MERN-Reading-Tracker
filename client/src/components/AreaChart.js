@@ -20,9 +20,9 @@ const AreaChartComponent = ({data}) => {
             <Tooltip />
             <Legend />
             <CartesianGrid strokeDasharray='3 3' />
-
-            <Area yAxisId="right" type="monotone" dataKey="total" fill='#faae16'  stroke="#ff7300" />
+            
             <Area yAxisId="left"  type="monotone" dataKey="count" fill='#2dba30' stroke="#1db302" />
+            <Area yAxisId="right" type="monotone" dataKey="total" fill='#faae16'  stroke="#ff7300" />
 
         </ComposedChart>
 

@@ -5,7 +5,7 @@ import {DISPLAY_ALERT, CLEAR_ALERT,
     HANDLE_CHANGE, CLEAR_VALUES,
     CREATE_ITEM_BEGIN, CREATE_ITEM_SUCCESS, CREATE_ITEM_ERROR, 
     GET_ITEMS_BEGIN, GET_ITEMS_SUCCESS,
-    SET_EDIT_ITEM, DELETE_ITEM_BEGIN,
+    SET_EDIT_ITEM, DELETE_ITEM_BEGIN, DELETE_ITEM_ERROR,
     EDIT_ITEM_BEGIN, EDIT_ITEM_SUCCESS, EDIT_ITEM_ERROR,
     SHOW_STATS_BEGIN, SHOW_STATS_SUCCESS, CLEAR_FILTERS, CHANGE_PAGE
 } from './actions'
@@ -177,10 +177,18 @@ const reducer = (state, action) => {
             itemName, author, seller, price, genres, status, purpose
         }
     }
-    //DELETE_ITEM_BEGIN
+    //DELETE_ITEM
     if (action.type === DELETE_ITEM_BEGIN) {
         return {...state, 
             isLoading:true,
+        }
+    }
+    if (action.type === DELETE_ITEM_ERROR) {
+        return {...state, 
+            isLoading:false,
+            showAlert:true,
+            alertType:'danger',
+            alertText:action.payload.msg
         }
     }
     //EDIT_ITEM
