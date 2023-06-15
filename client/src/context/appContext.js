@@ -1,4 +1,4 @@
-import React, { useReducer, useContext } from 'react'
+import React, { useReducer, useContext, useEffect } from 'react'
 import axios from 'axios'
 import reducer from '../context/reducers'
 import { DISPLAY_ALERT, CLEAR_ALERT, 
@@ -10,18 +10,22 @@ import { DISPLAY_ALERT, CLEAR_ALERT,
     GET_ITEMS_BEGIN, GET_ITEMS_SUCCESS,
     SET_EDIT_ITEM, DELETE_ITEM_BEGIN, DELETE_ITEM_ERROR,
     EDIT_ITEM_BEGIN, EDIT_ITEM_SUCCESS, EDIT_ITEM_ERROR,
-    SHOW_STATS_BEGIN, SHOW_STATS_SUCCESS, CLEAR_FILTERS, CHANGE_PAGE
+    SHOW_STATS_BEGIN, SHOW_STATS_SUCCESS, CLEAR_FILTERS, CHANGE_PAGE,
+    GET_CURRENT_USER_BEGIN, GET_CURRENT_USER_SUCCESS
 } from './actions'
 
-const user = localStorage.getItem('user')
-const token = localStorage.getItem('token')
+// const user = localStorage.getItem('user')
+// const token = localStorage.getItem('token')
+
 const initialState = {
+    userLoading: true,
     isLoading:false,
     showAlert:false,
     alertText:'',
     alertType:'',
-    user:user ? JSON.parse(user) : null,
-    token:token,
+    // user:user ? JSON.parse(user) : null,
+    user:null,
+    // token:token,
     showSidebar:false,
     isEditing:false,
     editItemId:'',
@@ -48,7 +52,7 @@ const initialState = {
     sort: 'mới nhất',
     sortOptions: ['mới nhất', 'cũ nhất', 'a-z', 'z-a'],
     filterPrice: 'tất cả', 
-    filterPriceOptions: ['Dưới 400,000', 'Từ 400,000 đến 500,000', 'Trên 500,000']
+    filterPriceOptions: ['Dưới 400,000', 'Từ 400,000 đến dưới 500,000', 'Từ 500,000']
 }
 const AppContext = React.createContext()
 
@@ -57,16 +61,18 @@ const AppProvider = ({children}) => {
     const authFetch = axios.create({
         baseURL: '/api/v1',
       });    
-    // request interceptor
-    authFetch.interceptors.request.use(
-        (config) => {
-            config.headers['Authorization'] = `Bearer ${state.token}`;
-            return config;
-        },
-        (error) => {
-            return Promise.reject(error);
-        }
-    );
+    //------request interceptor >>> remove when using cookies------
+    // authFetch.interceptors.request.use(
+    //     (config) => {
+    //         config.headers['Authorization'] = `Bearer ${state.token}`;
+    //         return config;
+    //     },
+    //     (error) => {
+    //         return Promise.reject(error);
+    //     }
+    // );
+    //------end of request interceptor >>> remove when using cookies------
+
     // response interceptor
     authFetch.interceptors.response.use(
         (response) => {
@@ -90,26 +96,28 @@ const AppProvider = ({children}) => {
             dispatch({type: CLEAR_ALERT})
         }, 3000)
     }
-    const addUserToLocalStorage = ({user, token}) => {
-        localStorage.setItem('user', JSON.stringify(user))
-        localStorage.setItem('token', token)
-    }
-    const removeUserFromLocalStorage = () => {
-        localStorage.removeItem('user')
-        localStorage.removeItem('token')
-    }
+    //------start of add to and remove from local storage >>> remove when using cookies------
+    // const addUserToLocalStorage = ({user, token}) => {
+    //     localStorage.setItem('user', JSON.stringify(user))
+    //     localStorage.setItem('token', token)
+    // }
+    // const removeUserFromLocalStorage = () => {
+    //     localStorage.removeItem('user')
+    //     localStorage.removeItem('token')
+    // }
+    //------end of add to and remove from local storage >>> remove when using cookies------
     const registerUser = async (currentUser) => {
         dispatch({type:REGISTER_USER_BEGIN})
         try {
             const response = await axios.post('/api/v1/auth/register',currentUser) //currentUSer nay la input tu nguoi dung ben component Register
             console.log(response);
-            const { user, token } = response.data // data nay la properties trong response tu server (authController, register request)
+            const { user } = response.data // data nay la properties trong response tu server (authController, register request)
             dispatch({
                 type:REGISTER_USER_SUCCESS,
-                payload:{user, token}
+                payload:{user}
             })
             //local storage later (bearer)
-            addUserToLocalStorage({user, token})
+            // addUserToLocalStorage({user, token})
         } catch (e) {
             console.log(e.response);
             dispatch({
@@ -123,13 +131,13 @@ const AppProvider = ({children}) => {
         dispatch({type:LOGIN_USER_BEGIN})
         try {
             const {data} = await axios.post('/api/v1/auth/login',currentUser)
-            const { user, token, lastName } = data // data nay la properties trong response tu server (authController, login request)
+            const { user, lastName } = data // data nay la properties trong response tu server (authController, login request)
             dispatch({
                 type:LOGIN_USER_SUCCESS,
-                payload:{user, token, lastName}
+                payload:{user, lastName}
             })
             //local storage later (bearer)
-            addUserToLocalStorage({user, token, lastName})
+            // addUserToLocalStorage({user, token, lastName})
         } catch (e) {
             dispatch({
                 type:LOGIN_USER_ERROR, 
@@ -141,21 +149,22 @@ const AppProvider = ({children}) => {
     const toggleSidebar = () => {
         dispatch({type:TOGGLE_SIDEBAR})
     }
-    const logoutUser = () => {
+    const logoutUser = async () => {
+        await authFetch.get('/auth/logout')
         dispatch({type:LOGOUT_USER})
-        removeUserFromLocalStorage() 
+        // removeUserFromLocalStorage() 
     }
     const updateUser = async (currentUser) => {
         dispatch({type:UPDATE_USER_BEGIN})
         try {
             const {data} = await authFetch.patch('/auth/updateUser',currentUser,)
-            const {user, token, lastName} = data
+            const {user, lastName} = data
             dispatch({
                 type:UPDATE_USER_SUCCESS,
-                payload:{user, token, lastName}
+                payload:{user, lastName}
             })
             //local storage later (bearer)
-            addUserToLocalStorage({user, token, lastName})
+            // addUserToLocalStorage({user, token, lastName})
         } catch (e) {
             if(e.response.status !== 401) {
                 dispatch({
@@ -202,17 +211,18 @@ const AppProvider = ({children}) => {
             let filters
             switch(filterPrice) {
                 case 'Dưới 400,000':
-                  filters = "<400000";
+                  filters = '<400000';
                   break;
-                case "Từ 400,000 đến 500,000":
-                  filters = ">=400000<500000";
+                case "Từ 400,000 đến dưới 500,000":
+                  filters = '>=400000<500000';
                   break;
-                case "Trên 500,000":
-                  filters = ">500000";
+                case "Từ 500,000":
+                  filters = '>=500000';
                   break;
                 default:
                   filters = 'tất cả';
             }
+            console.log(filters);
             url += `&numericFilters=price${filters}`
         }
         dispatch({ type: GET_ITEMS_BEGIN });
@@ -287,6 +297,25 @@ const AppProvider = ({children}) => {
     const changePage = (page) => {
         dispatch({ type:CHANGE_PAGE, payload:{page} })
     }
+    const getCurrentUser = async () => {
+        dispatch({ type: GET_CURRENT_USER_BEGIN });
+        try {
+          const { data } = await authFetch.get('/auth/getCurrentUser');
+          const { user } = data;
+    
+          dispatch({
+            type: GET_CURRENT_USER_SUCCESS,
+            payload: { user },
+          });
+        } catch (error) {
+          logoutUser();
+        }
+      };
+      useEffect(() => {
+        getCurrentUser();
+        // eslint-disable-next-line
+      }, []);
+    
     return (
         <AppContext.Provider value={{...state, displayAlert, registerUser, loginUser, toggleSidebar, logoutUser, updateUser, handleChange, clearValues, createItem, getItems, setEditItem, deleteItem, editItem, showStats, clearFilters, changePage}}>
             {children}

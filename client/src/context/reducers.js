@@ -7,7 +7,8 @@ import {DISPLAY_ALERT, CLEAR_ALERT,
     GET_ITEMS_BEGIN, GET_ITEMS_SUCCESS,
     SET_EDIT_ITEM, DELETE_ITEM_BEGIN, DELETE_ITEM_ERROR,
     EDIT_ITEM_BEGIN, EDIT_ITEM_SUCCESS, EDIT_ITEM_ERROR,
-    SHOW_STATS_BEGIN, SHOW_STATS_SUCCESS, CLEAR_FILTERS, CHANGE_PAGE
+    SHOW_STATS_BEGIN, SHOW_STATS_SUCCESS, CLEAR_FILTERS, CHANGE_PAGE,
+    GET_CURRENT_USER_BEGIN, GET_CURRENT_USER_SUCCESS
 } from './actions'
 import { initialState } from './appContext'
 const reducer = (state, action) => {
@@ -35,7 +36,7 @@ const reducer = (state, action) => {
         return {...state, 
             isLoading:false,
             user:action.payload.user,
-            token: action.payload.token,
+            // token: action.payload.token,
             showAlert:true,
             alertType:'success',
             alertText:'Tài khoản người dùng tạo thành công! Đang chuyển trang...'
@@ -59,7 +60,7 @@ const reducer = (state, action) => {
         return {...state, 
             isLoading:false,
             user:action.payload.user,
-            token: action.payload.token,
+            // token: action.payload.token,
             showAlert:true,
             alertType:'success',
             alertText:'Đăng nhập thành công! Đang chuyển trang...'
@@ -79,9 +80,10 @@ const reducer = (state, action) => {
         }
     }
     if (action.type === LOGOUT_USER) { 
-        return {...initialState, 
+        return {...initialState,
+            userLoading:false, 
             user:null,
-            token:null,
+            // token:null,
         }
     }
     //update user
@@ -94,7 +96,7 @@ const reducer = (state, action) => {
         return {...state, 
             isLoading:false,
             user:action.payload.user,
-            token: action.payload.token,
+            // token: action.payload.token,
             showAlert:true,
             alertType:'success',
             alertText:'Lưu thông tin thành công!'
@@ -240,6 +242,19 @@ const reducer = (state, action) => {
     if (action.type === CHANGE_PAGE) {
         return {...state, 
             page:action.payload.page
+        }
+    }
+    //get current user
+    if (action.type === GET_CURRENT_USER_BEGIN) {
+        return {...state, 
+            userLoading:true,
+            showAlert:false,
+        }
+    }
+    if (action.type === GET_CURRENT_USER_SUCCESS) {
+        return {...state, 
+            userLoading:false,
+            user:action.payload.user
         }
     }
     

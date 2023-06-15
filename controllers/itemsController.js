@@ -42,26 +42,30 @@ const getAllItems = async (req, res) => {
             '<': '$lt',
             '<=': '$lte',
           };
-          const regEx = /\b(<|>|>=|=|<|<=)\b/g;
+          const regEx = /\b(<|>|>=|=|<=)\b/g
           let filters = numericFilters.replace(
             regEx,
             (match) => `-${operatorMap[match]}-`
           );
-
+            console.log(filters);
           const options = ['price'];
           filters = filters.split(',').forEach((item) => {
             const [field, operator, value, operator2, value2] = item.split('-');
             if (options.includes(field)) {
                 if(operator2 === undefined) {
                         queryObject[field] = { [operator]: Number(value) };
+                        console.log(queryObject)
+
                 }
                 else {
                     queryObject[field] = { [operator]: Number(value),[operator2]:Number(value2) };
+                    console.log(queryObject)
+
                 }
             }
           });
-    }
-    
+          console.log(queryObject)
+    }   
     let result = Item.find(queryObject)
     // chain sort conditions
     if (sort === 'mới nhất') {

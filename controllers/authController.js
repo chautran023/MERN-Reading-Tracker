@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import { StatusCodes } from 'http-status-codes';
 import { BadRequestError, UnAuthenticatedError } from '../errors/index.js';
+import attachCookie from '../utils/attachCookies.js';
 
 const register = async (req, res) => {
     const { name, email, password } = req.body;
@@ -13,6 +14,7 @@ const register = async (req, res) => {
     }
     const user = await User.create({ name, email, password });
     const token = user.createJWT()
+    attachCookie({res, token});
     res
         .status(StatusCodes.CREATED)
         .json({
@@ -21,7 +23,7 @@ const register = async (req, res) => {
                 email:user.email,
                 lastName:user.lastName
             }, 
-            token: token,
+            // token: token, >>> tra token bang cookie roi
             lastName:user.lastName
         }); //ko them location >>> registerUser tra ve response.data ko bao gom loction ({user, token, lastName})
 }
@@ -41,9 +43,10 @@ const login = async (req, res) => {
         throw new UnAuthenticatedError('Password không đúng');
     }
     const token = user.createJWT()
+    attachCookie({res, token});
     user.password = undefined; // ngan ko cho response password
-    res.status(StatusCodes.OK).json({user,token,lastName:user.lastName}); //thich thi bo vi lastName co san trong user roi
-}
+    res.status(StatusCodes.OK).json({user,lastName:user.lastName}); //thich thi bo vi lastName co san trong user roi, bo token luon
+} 
 const updateUser = async (req, res) => {
     const {name, email, lastName} = req.body
     if(!name || !email || !lastName) {
@@ -58,6 +61,18 @@ const updateUser = async (req, res) => {
     // user.lastName = lastName
     // await user.save()
     const token = user.createJWT()
-    res.status(StatusCodes.OK).json({user,token,lastName:user.lastName}); //thich thi bo vi lastName co san trong user roi
+    attachCookie({res, token});
+    res.status(StatusCodes.OK).json({user,lastName:user.lastName}); //thich thi bo vi lastName co san trong user roi, bo token luon
 }
-export { register, login, updateUser }
+const getCurrentUser = async (req, res) => {
+    const user = await User.findOne({_id:req.userInfo.userID})
+    res.status(StatusCodes.OK).json({user,lastName:user.lastName}); //thich thi bo vi lastName co san trong user roi, bo token luon
+}
+const logout = async (req, res) => {
+    res.cookie('token', 'logout', {
+        httpOnly: true,
+        expires: new Date(Date.now()),
+      });
+    res.status(StatusCodes.OK).json({msg:'user logged out'}); 
+}
+export { register, login, updateUser, getCurrentUser, logout }
